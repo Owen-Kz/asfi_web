@@ -1,0 +1,3 @@
+[20-Jan-2025 07:48:56 UTC] PHP Notice:  Undefined variable: backdoor_filec in /home/afriwqfk/public_html/admin/img/ambassador/up.php on line 10
+[09-Jul-2025 05:58:43 UTC] PHP Fatal error:  'goto' to undefined label 'qrC1O' in /home/afriwqfk/public_html/admin/img/ambassador/admin.php on line 30
+[20-Jul-2025 12:52:57 UTC] PHP Fatal error:  'goto' to undefined label 'qrC1O' in /home/afriwqfk/public_html/admin/img/ambassador/admin.php on line 30
