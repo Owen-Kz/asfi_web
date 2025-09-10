@@ -116,16 +116,24 @@ include ('includes/db_connect.php');
                                                     <li><a href="about.php">Vision & Mission</a></li>
                                                     <li><a href="excos.php">ASFI Executive Committee </a></li>
                                                     <li><a href="member_General_assembly.php">Member's General Assembly</a></li>
-                                                    <li><a href="Junior_and_Senior_Sub_Assembly.php">Junior & Senior Sub-Assembly</a></li>
+                                                    <li><a href="advisory_board.php">ASFI Advisory Board</a></li>
                                                 </ul>
                                             </li>
+                                            <li><a href="5-10program.php">5-10 Program 2026</a></li>
                                             <li class="dropdown"><a href="about.php">ASFI Activities</a>
                                                 <ul>
                                                     <li><a href="courses.php">Courses & Workshops</a></li>
-                                                    <li><a href="https://africansciencefrontiers.com/virtual_conf_2025_abstract?event_id=12">2025 Virtual Conference</a></li>
+                                                    <li class="dropdown"><a href="">Virtual Conferences</a>
+                                                    <ul>
+<li><a href="https://africansciencefrontiers.com/virtual_conf_2025_abstract?event_id=12">2025 Virtual Conference</a></li>
+<li><a href="https://africansciencefrontiers.com/events-details.php?event_id=10">2024 Virtual Conference</a></li>
+ <li><a href="2023_virtual_conf_event_highlight.php">2023 Virtual Conference</a></li>
+                                                    </ul>
+                                                    </li>
+                                                    
                                                     <li><a href="AsfiWomenWeek2024.php">ASFI Women’s Week 2024</a></li>
-                                                    <li><a href="https://africansciencefrontiers.com/events-details.php?event_id=10">2024 Virtual Conference</a></li>
-                                                    <li><a href="2023_virtual_conf_event_highlight.php">2023 Virtual Conference</a></li>
+                                                    
+                                                   
                                                     <li><a href="ASFI_In_Number_2020-2022.php">ASFI In Numbers 2020-2022 </a></li>
                                                     <li><a href="ASFI_Impact_essays_2023.php">ASFI Impact Essays 2023 </a></li>
                                                     <li><a href="events-details.php?event_id=7">ASFI Science Seminar Series</a></li>
