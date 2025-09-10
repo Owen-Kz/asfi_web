@@ -3,34 +3,70 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 session_start();
- $result ="";
-   if(isset($_POST['submit'])){
-	   $user = $_POST['username']; 
-	   $pwrd = $_POST['pwrd'];
-	   //include database connection
-	   include ('../includes/db_connect.php');
-	   if(empty($user) || empty($pwrd)){
-		   $result = "Username and Password is empty"; 
-	   } else{
-		   $user = strip_tags($user);
-		   $user = $db->real_escape_string($user);
-		   $pwrd = strip_tags($pwrd);
-		   $pwrd = $db->real_escape_string($pwrd);
-		   $pwrd = md5($pwrd);
-		   
-		   $query = $db->query("SELECT admin_id, admin_username FROM admin WHERE admin_username='$user' AND admin_password='$pwrd'");
-		   if($query->num_rows ===1){
-			   while($row =$query->fetch_object()){
-				$_SESSION['admin_username']= $row->admin_username;
-				$_SESSION['admin_id'] = $row->admin_id;
-			   }
-			   header('Location: index.php');
-			   exit();
-		   }else{
-			  $result = "Username and Password incorrect"; 
-		   }
-	   }
-   }
+
+// Add your reCAPTCHA keys here (replace with your actual keys)
+$recaptcha_site_key = "6LcEcsUrAAAAACd3CAtZIO54BjvF7viwD__b0vTB";
+$recaptcha_secret_key = "6LcEcsUrAAAAAP4RLg3FraLr0ZQU0WYmoBLg_g8D";
+
+$result = "";
+if(isset($_POST['submit'])){
+    $user = $_POST['username']; 
+    $pwrd = $_POST['pwrd'];
+    
+    // Verify reCAPTCHA response
+    $recaptcha_response = $_POST['g-recaptcha-response'];
+    
+    // Include database connection
+    include ('../includes/db_connect.php');
+    
+    if(empty($user) || empty($pwrd)){
+        $result = "Username and Password is empty"; 
+    } elseif(empty($recaptcha_response)) {
+        $result = "Please complete the reCAPTCHA verification";
+    } else {
+        // Verify reCAPTCHA with Google
+        $recaptcha_url = 'https://www.google.com/recaptcha/api/siteverify';
+        $recaptcha_data = [
+            'secret' => $recaptcha_secret_key,
+            'response' => $recaptcha_response,
+            'remoteip' => $_SERVER['REMOTE_ADDR']
+        ];
+        
+        $recaptcha_options = [
+            'http' => [
+                'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method' => 'POST',
+                'content' => http_build_query($recaptcha_data)
+            ]
+        ];
+        
+        $recaptcha_context = stream_context_create($recaptcha_options);
+        $recaptcha_result = file_get_contents($recaptcha_url, false, $recaptcha_context);
+        $recaptcha_json = json_decode($recaptcha_result);
+        
+        if(!$recaptcha_json->success) {
+            $result = "reCAPTCHA verification failed. Please try again.";
+        } else {
+            $user = strip_tags($user);
+            $user = $db->real_escape_string($user);
+            $pwrd = strip_tags($pwrd);
+            $pwrd = $db->real_escape_string($pwrd);
+            $pwrd = md5($pwrd);
+            
+            $query = $db->query("SELECT admin_id, admin_username FROM admin WHERE admin_username='$user' AND admin_password='$pwrd'");
+            if($query->num_rows === 1){
+                while($row = $query->fetch_object()){
+                    $_SESSION['admin_username'] = $row->admin_username;
+                    $_SESSION['admin_id'] = $row->admin_id;
+                }
+                header('Location: index.php');
+                exit();
+            } else {
+                $result = "Username and Password incorrect"; 
+            }
+        }
+    }
+}
 ?>
 
 
@@ -58,38 +94,48 @@ session_start();
   <!-- Custom styles -->
   <link href="css/style.css" rel="stylesheet">
   <link href="css/style-responsive.css" rel="stylesheet" />
+  
+  <!-- reCAPTCHA API -->
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 
 <body class="login-img3-body">
 
   <div class="container">
 
-    <form class="login-form"  action="<?php echo $_SERVER['PHP_SELF'];?>" method="post">
+    <form class="login-form" action="<?php echo $_SERVER['PHP_SELF'];?>" method="post">
       <div class="login-wrap">
         <p class="login-img"><i class="icon_lock_alt"></i></p>
-        <div class="input-group">
-         <p><?=$result;?></p>
         
+        <?php if(!empty($result)): ?>
+        <div class="alert alert-danger">
+          <?php echo $result; ?>
         </div>
-		 <div class="input-group">
+        <?php endif; ?>
+        
+        <div class="input-group">
           <span class="input-group-addon"><i class="icon_profile"></i></span>
           <input type="text" class="form-control" name="username" placeholder="Username" autofocus>
         </div>
         <div class="input-group">
           <span class="input-group-addon"><i class="icon_key_alt"></i></span>
-          <input type="password" class="form-control" name="pwrd"  placeholder="Password">
+          <input type="password" class="form-control" name="pwrd" placeholder="Password">
         </div>
+        
+        <!-- Add reCAPTCHA widget -->
+        <div class="form-group" style="margin: 15px 0; display: flex; justify-content: center;">
+          <div class="g-recaptcha" data-sitekey="<?php echo $recaptcha_site_key; ?>"></div>
+        </div>
+        
         <button class="btn btn-primary btn-lg btn-block" name="submit" type="submit">Login</button>
       </div>
     </form>
     <div class="text-right">
       <div class="credits">
-        
-          Designed by <a href="#">WebHub Services</a>
-        </div>
+        Managed By <a href="#">Weperch Technologies LLC.</a>
+      </div>
     </div>
   </div>
-
 
 </body>
 

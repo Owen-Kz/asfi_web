@@ -24,34 +24,42 @@
    
    ?>
    
-   
-    <div class="newsletter-two">
-        <div class="auto-container">
-            <div class="wrapper-box">
-                <div class="row m-0 justify-content-between align-items-center">
-                    <div class="column">
-                        <div class="logo"><a href="index.php"><img src="images/logo-8.png" alt=""></a></div>
-                    </div>
-                    <div class="column">
-                        <form action="" method="post">
-                            <input type="email" name="sub_email" placeholder="Your Email Address...">
-                            <button type="submit" name="sub_email_submit" class="theme-btn btn-style-fourteen"><span>Subscribe Us</span></button>                        
-                        </form>
-                    </div>
-                    <div class="column">
-                        <ul class="social-icon-three">
-                            <li><a href="https://www.facebook.com/groups/392075606316714/"><span class="fa fa-facebook"></span></a></li>
-                            <li><a href="https://twitter.com/AfricanScience2"><span class="fa fa-twitter"></span></a></li>
-                            <li><a href="https://www.youtube.com/c/ASFIHubForResearchCapacityBuilding"><span class="fa fa-youtube"></span></a></li>
-                        
-                             <li><a href="https://www.instagram.com/asfi_africa/"><span class="fa fa-instagram"></span></a></li>
-                            <li><a href="https://www.linkedin.com/in/african-science-frontiers-initiatives-asfi-74967b240/"><span class="fa fa-linkedin"></span></a></li>
-                        </ul>
-                    </div>
+
+
+<div class="newsletter-two">
+    <div class="auto-container">
+        <div class="wrapper-box">
+            <div class="row m-0 justify-content-between align-items-center">
+                <div class="column">
+                    <div class="logo"><a href="index.php"><img src="images/logo-8.png" alt=""></a></div>
+                </div>
+                <div class="column">
+                    <form action="" method="post">
+                        <input type="email" name="sub_email" placeholder="Your Email Address...">
+                        <!-- Add reCAPTCHA widget -->
+                        <div class="g-recaptcha" data-sitekey="<?php echo $recaptcha_site_key; ?>"></div>
+                        <button type="submit" name="sub_email_submit" class="theme-btn btn-style-fourteen"><span>Subscribe Us</span></button>                        
+                    </form>
+                </div>
+                <div class="column">
+                    <ul class="social-icon-three">
+                        <li><a href="https://www.facebook.com/groups/392075606316714/"><span class="fa fa-facebook"></span></a></li>
+                        <li><a href="https://twitter.com/AfricanScience2"><span class="fa fa-twitter"></span></a></li>
+                        <li><a href="https://www.youtube.com/c/ASFIHubForResearchCapacityBuilding"><span class="fa fa-youtube"></span></a></li>
+                    
+                         <li><a href="https://www.instagram.com/asfi_africa/"><span class="fa fa-instagram"></span></a></li>
+                        <li><a href="https://www.linkedin.com/in/african-science-frontiers-initiatives-asfi-74967b240/"><span class="fa fa-linkedin"></span></a></li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<!-- Add reCAPTCHA API script -->
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+<!-- Rest of your footer code remains the same -->
 
     <!-- Main Footer -->
     <footer class="main-footer">
@@ -114,7 +122,7 @@
         <div class="footer-bottom-two">
             <div class="auto-container">
                 <div class="row m-0 justify-content-between">
-                    <div class="copy-right-text"><a style="color:#fff;" href="https://api.whatsapp.com/send?phone=2348101548759">WebHub Services</a></div>
+                    <div class="copy-right-text"><a style="color:#fff;" href="#">Weperch Technologies LLC.</a></div>
                    
                 </div>                
             </div>

@@ -1,6 +1,6 @@
  <div class="text-right">
         <div class="credits">
-             Designed by <a href="#">Webhub Services</a>
+             Managed By <a href="#">Weperch Technologies LLC.</a>
         </div>
 </div>
     </section>
