@@ -86,7 +86,7 @@
                                     <li><a href="events-details.php?event_id=7">ASFI Science Seminar Series</a></li>
                                     <li><a href="events-details.php?event_id=6">Dr. Nwaru’s Research Tips & Tricks</a></li>
                                     <li><a href="mentoring_program.php">ASFI Mentoring Program</a></li>
-                                    <li><a href="ASFIscholar.php">ASFI AfroScholar</a></li>
+                                    <li><a href="ASFIscholar.php">ASFIScholar</a></li>
                                     <li><a href="asfi_ambassador_program.php">ASFI Ambassadors Program</a></li>
                                     <li><a href="contact.php">Contact Us</a></li>
                                 </ul>

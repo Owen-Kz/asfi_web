@@ -3,6 +3,31 @@ include_once ('header.php');
 include ('../includes/db_connect.php');
 include('side_content.php');
 
+// Pagination configuration
+$results_per_page = 10; // Number of results per page
+
+// Get current page number
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) $page = 1;
+
+// Calculate offset
+$offset = ($page - 1) * $results_per_page;
+
+// Get total number of posts
+$total_result = $db->query("SELECT COUNT(*) as total FROM posts");
+$total_row = $total_result->fetch_assoc();
+$total_posts = $total_row['total'];
+
+// Calculate total pages
+$total_pages = ceil($total_posts / $results_per_page);
+
+// Ensure page doesn't exceed total pages
+if ($page > $total_pages && $total_pages > 0) {
+    $page = $total_pages;
+}
+
+// Fetch posts for current page with optimized query
+$result_post = $db->query("SELECT post_id, post_title, post_date, category FROM posts ORDER BY post_id DESC LIMIT $offset, $results_per_page");
 
 if(isset($_POST['post_add'])){
     
@@ -91,22 +116,21 @@ if(isset($_GET['action'])){
 
 	if($_GET['action'] == 'delete'){
 		
-		$post_id = $_GET['post_id'];
+		$post_id = (int)$_GET['post_id'];
 
 		$delete = $db->query("DELETE FROM `posts` WHERE `posts`.`post_id` = $post_id");
 	
 		if($delete){
-
 			$_SESSION['alert'] = "Blog Post Deleted";
 			$_SESSION['alert_code'] = "success";
-			$_SESSION['alert_link'] = "post.php";
+			$_SESSION['alert_link'] = "post.php?page=" . $page;
+			
+			// Redirect to avoid resubmission on refresh
+			header("Location: post.php?page=" . $page);
+			exit();
 		}
 	}		
 }
-
-
-
-
 
 ?>
  <!--main content start-->
@@ -123,10 +147,11 @@ if(isset($_GET['action'])){
         </div>
         <!-- page start-->
 		 <div class="row">
-                    <div class="col-md-12">
-                        <h2>Blog</h2>
-                    </div>
-     </div>
+            <div class="col-md-12">
+                <h2>Blog</h2>
+                <p>Total: <?= $total_posts ?> blog posts</p>
+            </div>
+        </div>
 	<div class="row">
 	    <div class="col-md-12">
             <h4>Add New Blog <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#newArticle">Click Here</button> </h4>
@@ -136,49 +161,95 @@ if(isset($_GET['action'])){
 	<div class="row">
 		<div class="col-lg-1 col-md-1"></div>
 		<div class="col-lg-10 col-md-10">
-					<?php 
-					 $result_post = $db->query("SELECT * FROM posts ORDER BY post_id DESC");
-		             ?> 
 					 
-						<h3>Content Table</h3>
-                        <table class="table table-striped table-bordered table-hover">
-                            <thead>
-                                <tr>
-                                    <th>No</th>
-                                    <th>Post title</th>
-                                    <th>Date and Time</th>
-									<th>Category</th>
-									<th>Action</th>
-                                    <th>Live Details</th>
-                                  
-                                </tr>
-                            </thead>
-                            <?php
-                             $count =1;
-							while($post = $result_post->fetch_assoc()): ?>
-							<tbody>      
-                                 <tr>
-								     <td><?=$count++?></td>
-		                             <td><?=$post['post_title']?></td>
-			                         <td><?=$post['post_date']?></td>
-									 
-									  
-                                    <td> <?=$post['category']?></td>
-				                 
-									 <td><a href="edit_post.php?pid=<?=$post['post_id']?>"class="btn btn-primary">Edit</a> <a href="?post_id=<?=$post['post_id']?>&action=delete"class="btn btn-danger">Delete</a></td>
-									 <td> <a href="../news-details.php?blog_id=<?=$post['post_id']?>"class="btn btn-primary">Live Preview</a></td>
-		                         </tr>
-							
-                            </tbody>
-							<?php endwhile?>
-                        </table>
-			
+			<h3>Content Table</h3>
+            <table class="table table-striped table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Post title</th>
+                        <th>Date and Time</th>
+						<th>Category</th>
+						<th>Action</th>
+                        <th>Live Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php
+                $count = ($page - 1) * $results_per_page + 1;
+                if ($result_post->num_rows > 0) {
+                    while($post = $result_post->fetch_assoc()): 
+                ?>
+                    <tr>
+                        <td><?=$count++?></td>
+                        <td><?=htmlspecialchars($post['post_title'])?></td>
+                        <td><?=$post['post_date']?></td>
+                        <td><?=htmlspecialchars($post['category'])?></td>
+                        <td>
+                            <a href="edit_post.php?pid=<?=$post['post_id']?>" class="btn btn-primary">Edit</a> 
+                            <a href="?post_id=<?=$post['post_id']?>&action=delete&page=<?=$page?>" 
+                               class="btn btn-danger" 
+                               onclick="return confirm('Are you sure you want to delete this blog post?')">Delete</a>
+                        </td>
+                        <td> 
+                            <a href="../news-details.php?blog_id=<?=$post['post_id']?>" class="btn btn-primary">Live Preview</a>
+                        </td>
+                    </tr>
+                <?php 
+                    endwhile;
+                } else {
+                    echo '<tr><td colspan="6" class="text-center">No blog posts found</td></tr>';
+                }
+                ?>
+                </tbody>
+            </table>
+            
+            <!-- Pagination -->
+            <?php if ($total_pages > 1): ?>
+            <div class="text-center">
+                <ul class="pagination">
+                    <?php if ($page > 1): ?>
+                        <li><a href="?page=1">&laquo; First</a></li>
+                        <li><a href="?page=<?= $page - 1 ?>">Previous</a></li>
+                    <?php endif; ?>
+                    
+                    <?php
+                    // Show page numbers with ellipsis for many pages
+                    $start_page = max(1, $page - 2);
+                    $end_page = min($total_pages, $page + 2);
+                    
+                    if ($start_page > 1) {
+                        echo '<li><a href="?page=1">1</a></li>';
+                        if ($start_page > 2) echo '<li class="disabled"><span>...</span></li>';
+                    }
+                    
+                    for ($i = $start_page; $i <= $end_page; $i++):
+                    ?>
+                        <li class="<?= $i == $page ? 'active' : '' ?>">
+                            <a href="?page=<?= $i ?>"><?= $i ?></a>
+                        </li>
+                    <?php endfor; ?>
+                    
+                    <?php
+                    if ($end_page < $total_pages) {
+                        if ($end_page < $total_pages - 1) echo '<li class="disabled"><span>...</span></li>';
+                        echo '<li><a href="?page='.$total_pages.'">'.$total_pages.'</a></li>';
+                    }
+                    ?>
+                    
+                    <?php if ($page < $total_pages): ?>
+                        <li><a href="?page=<?= $page + 1 ?>">Next</a></li>
+                        <li><a href="?page=<?= $total_pages ?>">Last &raquo;</a></li>
+                    <?php endif; ?>
+                </ul>
+                
+                <p>Page <?= $page ?> of <?= $total_pages ?></p>
+            </div>
+            <?php endif; ?>
+        </div>
     </div>
-        
-					
-				
-                <!-- /. ROW  -->
-        <!-- page end-->
+    <!-- /. ROW  -->
+    <!-- page end-->
       </section>
     </section>
 </section>		   
@@ -250,4 +321,4 @@ if(isset($_GET['action'])){
 					</div>
 
 				</div>
-			</div>  
+			</div>

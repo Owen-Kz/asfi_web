@@ -3,6 +3,31 @@ include_once ('header.php');
 include ('../includes/db_connect.php');
 include('side_content.php');
 
+// Pagination configuration
+$results_per_page = 10; // Number of results per page
+
+// Get current page number
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) $page = 1;
+
+// Calculate offset
+$offset = ($page - 1) * $results_per_page;
+
+// Get total number of ambassadors
+$total_result = $db->query("SELECT COUNT(*) as total FROM asfi_ambassador");
+$total_row = $total_result->fetch_assoc();
+$total_ambassadors = $total_row['total'];
+
+// Calculate total pages
+$total_pages = ceil($total_ambassadors / $results_per_page);
+
+// Ensure page doesn't exceed total pages
+if ($page > $total_pages && $total_pages > 0) {
+    $page = $total_pages;
+}
+
+// Fetch ambassadors for current page
+$result_event = $db->query("SELECT * FROM asfi_ambassador ORDER BY asfi_ambassador_id DESC LIMIT $offset, $results_per_page");
 
 if(isset($_POST['amb_submit'])){
 	//location of file
@@ -91,9 +116,6 @@ if(isset($_POST['amb_submit'])){
 		<div class="row">
 		<div class="col-lg-1 col-md-1"></div>
 					<div class="col-lg-10 col-md-10">
-					<?php 
-					 $result_event = $db->query("SELECT * FROM asfi_ambassador ORDER BY asfi_ambassador_id DESC");
-		             ?> 
 					 
 						<h3>Content Table</h3>
                         <table class="table table-striped table-bordered table-hover">
@@ -103,14 +125,16 @@ if(isset($_POST['amb_submit'])){
                                     <th>Names</th>
                                     <th>Country</th>
 									<th>Position</th>
+									<th>Year</th>
 									<th>Image</th>
 									<th>Action</th>
                                   
                                 </tr>
                             </thead>
                             <?php
-                             $count =1;
-							while($event = $result_event->fetch_assoc()): 
+                            $count = ($page - 1) * $results_per_page + 1;
+							if ($result_event->num_rows > 0) {
+                                while($event = $result_event->fetch_assoc()): 
 							?>
 							<tbody>      
                                  <tr>
@@ -118,14 +142,47 @@ if(isset($_POST['amb_submit'])){
 		                             <td><?=$event['asfi_ambassador_names']?></td>
 			                         <td><?=$event['asfi_ambassador_country']?></td>
 									 <td><?=$event['asfi_ambassador_position']?></td>
+									 <td><?=$event['asfi_ambassador_year']?></td>
                                      <td> <img src="img/ambassador/<?=$event['asfi_ambassador_image']?>" width="50px" alt=""> </td>
-									 <td> <a href="?asfi_ambassador_id=<?=$event['asfi_ambassador_id']?>&action=delete"class="btn btn-danger">Remove Ambassador</a></td>
+									 <td> <a href="?asfi_ambassador_id=<?=$event['asfi_ambassador_id']?>&action=delete&page=<?=$page?>"class="btn btn-danger">Remove Ambassador</a></td>
 		                         </tr>
 							
                             </tbody>
-							<?php endwhile?>
+							<?php endwhile;
+                            } else {
+                                echo '<tr><td colspan="7" class="text-center">No ambassadors found</td></tr>';
+                            }
+                            ?>
                         </table>
-			
+                        
+                        <!-- Pagination -->
+                        <div class="text-center">
+                            <ul class="pagination">
+                                <?php if ($page > 1): ?>
+                                    <li><a href="?page=1">&laquo; First</a></li>
+                                    <li><a href="?page=<?= $page - 1 ?>">Previous</a></li>
+                                <?php endif; ?>
+                                
+                                <?php
+                                // Show page numbers
+                                $start_page = max(1, $page - 2);
+                                $end_page = min($total_pages, $page + 2);
+                                
+                                for ($i = $start_page; $i <= $end_page; $i++):
+                                ?>
+                                    <li class="<?= $i == $page ? 'active' : '' ?>">
+                                        <a href="?page=<?= $i ?>"><?= $i ?></a>
+                                    </li>
+                                <?php endfor; ?>
+                                
+                                <?php if ($page < $total_pages): ?>
+                                    <li><a href="?page=<?= $page + 1 ?>">Next</a></li>
+                                    <li><a href="?page=<?= $total_pages ?>">Last &raquo;</a></li>
+                                <?php endif; ?>
+                            </ul>
+                            
+                            <p>Page <?= $page ?> of <?= $total_pages ?> (Total: <?= $total_ambassadors ?> ambassadors)</p>
+                        </div>
                </div>
         
 					
@@ -191,4 +248,4 @@ if(isset($_POST['amb_submit'])){
 					</div>
 
 				</div>
-			</div>  
+			</div>
