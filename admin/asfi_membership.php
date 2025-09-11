@@ -2,6 +2,39 @@
   include_once ('header.php');
   include_once ('side_content.php');
   
+  // Handle actual deletion after confirmation
+  if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete']) && $_POST['confirm_delete'] == 1) {
+      if (isset($_POST['selected_members']) && !empty($_POST['selected_members'])) {
+          $selected_members = $_POST['selected_members'];
+          // Sanitize the input to prevent SQL injection
+          $selected_members = array_map(function($id) use ($db) {
+              return $db->real_escape_string($id);
+          }, $selected_members);
+          
+          $ids = implode("','", $selected_members);
+          $delete_query = "DELETE FROM members_registration WHERE member_id IN ('$ids')";
+          
+          if ($db->query($delete_query)) {
+              echo '<div class="alert alert-success alert-dismissible fade show" role="alert">
+                  Selected members have been deleted successfully.
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>';
+              
+              // Refresh the page to update the list
+              echo '<script>setTimeout(function(){ window.location.href = window.location.href.split("?")[0]; }, 2000);</script>';
+          } else {
+              echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">
+                  Error deleting members: ' . $db->error . '
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>';
+          }
+      }
+  }
+  
   // Pagination setup
   $records_per_page = 10; // Number of records to show per page
   
@@ -45,13 +78,18 @@
               <div class="row">
                   <div class="col-md-12">
                       <div class="pull-right">
-                        <a class="btn btn-success" href="export.php"><i class="icon_plus_alt2"></i> Export To Xcel</a>                                          
+                        <a class="btn btn-success" href="export.php"><i class="icon_plus_alt2"></i> Export To Xcel</a>
+                        <button type="button" class="btn btn-danger" id="deleteSelected" disabled>
+                            <i class="icon_trash"></i> Delete Selected
+                        </button>                                          
                       </div>
                   </div>
               </div>
           </div><!-- /.box-header -->
           <br>
         <!-- page start-->
+        <form method="post" id="deleteForm">
+          <input type="hidden" name="confirm_delete" value="1">
          <div class="row">
           <div class="col-lg-12">
                 
@@ -64,6 +102,7 @@
                 
 				<tbody>
                   <tr>
+                    <th><input type="checkbox" id="selectAll"></th>
                     <th> S/N</th> 
                     <th><i class="icon_profile"></i> First Name</th>
                     <th><i class="icon_profile"></i> Surname</th>
@@ -74,6 +113,7 @@
                   </tr>
          <?php while($user = $result_users->fetch_assoc()): ?>
 				  <tr>
+				    <td><input type="checkbox" class="memberCheckbox" name="selected_members[]" value="<?=$user['member_id']?>"></td>
 				    <td><?php echo ++$count ?></td>
                     <td><?=$user['member_firstname']?> </td>
                     <td><?=$user['member_surname']?></td>
@@ -126,7 +166,64 @@
             </section>
           </div>
         </div>
+        </form>
         <!-- page end-->
         <!-- page end-->
       </section>
+      
+      <!-- Confirmation Modal -->
+      <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <h5 class="modal-title" id="confirmationModalLabel">Confirm Deletion</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                      </button>
+                  </div>
+                  <div class="modal-body">
+                      Are you sure you want to delete the selected members? This action cannot be undone.
+                  </div>
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                      <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+      
+      <script>
+      $(document).ready(function() {
+          // Select all functionality
+          $('#selectAll').click(function() {
+              $('.memberCheckbox').prop('checked', this.checked);
+              updateDeleteButton();
+          });
+          
+          // Update delete button state based on selection
+          $('.memberCheckbox').change(function() {
+              // If all checkboxes are checked, check the "Select All" checkbox
+              var allChecked = $('.memberCheckbox:checked').length === $('.memberCheckbox').length;
+              $('#selectAll').prop('checked', allChecked);
+              
+              updateDeleteButton();
+          });
+          
+          function updateDeleteButton() {
+              var anyChecked = $('.memberCheckbox:checked').length > 0;
+              $('#deleteSelected').prop('disabled', !anyChecked);
+          }
+          
+          // Delete selected members - show modal instead of browser confirm
+          $('#deleteSelected').click(function() {
+              $('#confirmationModal').modal('show');
+          });
+          
+          // Handle the actual deletion when confirm button is clicked
+          $('#confirmDelete').click(function() {
+              $('#deleteForm').submit();
+          });
+      });
+      </script>
+      
    <?php include_once ('footer.php');?>

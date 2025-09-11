@@ -3,7 +3,7 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
-
+ 
  include_once ('side_content.php');
  $count = 0;
   if(!isset($_GET['abstract_id'])){

@@ -129,6 +129,6 @@ $result_event = $db->query("SELECT * FROM abstract ORDER BY abstract_id DESC LIM
 		   <!-- Modal -->
 			
 
-                <!-- /. ROW  -->
+                <!-- /. ROW  --> 
 	 
 	 <?php include_once ('footer.php');?>
