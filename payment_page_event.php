@@ -1,4 +1,7 @@
 <?php include_once('header.php');
+include ('./includes/load_env.php');
+  $paymentKey = $_ENV['PAYMENT_KEY'] ?? getenv('PAYMENT_KEY');
+
     if(!isset($_GET['SubmitCode'])){
         echo "<script> window.location.href='courses.php';</script>";
         exit();
@@ -71,7 +74,7 @@
                         <script>
                             function payWithPaystack(){
                             var handler = PaystackPop.setup({
-                            key: 'pk_live_b1fa859ec6c697a6e6317776071f04898f559456',
+                            key: '<?php echo $paymentKey ?>',
                             email: '<?php echo $email?>',
                             amount: <?php echo $paymentPrice?>00,
                             currency: "<?=$currency?>",

@@ -4,9 +4,14 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 session_start();
 
-// Add your reCAPTCHA keys here (replace with your actual keys)
-$recaptcha_site_key = "6LcEcsUrAAAAACd3CAtZIO54BjvF7viwD__b0vTB";
-$recaptcha_secret_key = "6LcEcsUrAAAAAP4RLg3FraLr0ZQU0WYmoBLg_g8D";
+include (__DIR__.'../../includes/load_env.php');
+$siteKey = $_ENV['RECAPTCHA_SITE_KEY'] ?? getenv('RECAPTCHA_SITE_KEY');
+$captchaSecret = $_ENV['RECAPTCHA_SECRET_KEY'] ?? getenv('RECAPTCHA_SECRET_KEY');
+$recaptcha_site_key = $siteKey;
+$recaptcha_secret_key = $captchaSecret;
+// Add reCAPTCHA keys - REPLACE THESE WITH YOUR ACTUAL KEYS
+define('RECAPTCHA_SITE_KEY', "$siteKey");
+define('RECAPTCHA_SECRET_KEY', "$captchaSecret");
 
 $result = "";
 if(isset($_POST['submit'])){

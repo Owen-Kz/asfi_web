@@ -1,4 +1,9 @@
    <?php
+   include (__DIR__.'../../includes/load_env.php');
+$siteKey = $_ENV['RECAPTCHA_SITE_KEY'] ?? getenv('RECAPTCHA_SITE_KEY');
+$captchaSecret = $_ENV['RECAPTCHA_SECRET_KEY'] ?? getenv('RECAPTCHA_SECRET_KEY');
+$recaptcha_site_key = $siteKey;
+$recaptcha_secret_key = $captchaSecret;
        if(isset($_POST['sub_email_submit'])){
         
         $sub_email = $_POST['sub_email'];

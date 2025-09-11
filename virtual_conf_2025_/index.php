@@ -2,16 +2,19 @@
 
 session_start(); 
 require_once __DIR__ . '/../../includes/spam_detector.php';
+include ('../includes/load_env.php');
 include ('../includes/db_connect.php');
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
+
+// Remove PHPMailer includes since we're using Brevo API
+// use PHPMailer\PHPMailer\PHPMailer;
+// use PHPMailer\PHPMailer\SMTP;
+// use PHPMailer\PHPMailer\Exception;
 
 if(isset($_POST['submit_course_reg'])){
     
   // Verify reCAPTCHA
-  $secret = '6LeH3pIrAAAAAGQrqxG-PXRYkoqfyD-QSetxK1aE';
+  $secret = $_ENV['RECAPTCHA_SECRET'] ?? getenv('RECAPTCHA_SECRET');
   $response = $_POST['g-recaptcha-response'];
   $remoteip = $_SERVER['REMOTE_ADDR'];
 
@@ -33,8 +36,6 @@ if(isset($_POST['submit_course_reg'])){
       $presentation_type = $db->real_escape_string($presentation_type);
     
       $theme = null;
-      // $theme = strip_tags($theme);
-      // $theme = $db->real_escape_string($theme);
       
       $special_request = $_POST['special_request'];
       $special_request = strip_tags($special_request);
@@ -93,89 +94,147 @@ if(isset($_POST['submit_course_reg'])){
       $keywords = $db->real_escape_string($keywords);
     
       $lateBreaker = null;
-      // $lateBreaker = strip_tags($lateBreaker);
-      // $lateBreaker = $db->real_escape_string($lateBreaker);
     
+      // Updated email content
       $message = "
       <html>
-          <p>Dear $presenter</p>
-    
-          <p>Thank you for submitting your abstract to the 2nd ASFI Virtual Multidisciplinary Conference and Boot Camp. This email is to confirm that we have received your abstract and it is being given maximum attention by the conference abstract review committee. As indicated in the call for abstract, all abstract authors will be informed about the decision on their abstract by 31st August 2024.</p>
-          
-          <p>Meanwhile, registration to the conference opens on 15th June 2024, with further information below, including the registration link:</p>
-          
-          <ul>
-              <li>Early Bird (15th June – 30th September 2024)</li>
-              <li>ASFI Members: 10 USD</li>
-              <li>Non-ASFI Members: 30 USD</li>
-                  <hr>
-              <li>Late Registration (1st October – 26th November 2024)</li>
-              <li>ASFI Members: 20 USD</li>
-              <li>Non-ASFI Members: 50 USD</li>
-                  <hr>
-              <li>Registration link: <a href='https://cutt.ly/reeFhYN8'>https://cutt.ly/reeFhYN8</a></li>
-          </ul>
-          <p>Please feel free to circulate information about the conference to your colleagues and your networks.</p>
-          <p>Best wishes</p>
-          
-          <p>2nd ASFI Virtual Multidisciplinary Conference and Boot Camp Planning Committee <br />
-          African Science Frontiers Initiatives<br />
-          &quot;Raising the next generation of African scientists...&quot;<br />
-          www.africansciencefrontiers.com<br />
-          YouTube Channel: https://www.youtube.com/c/ASFIHubForResearchCapacityBuilding <br />
-          Twitter: @AfricanScience2<br />
-          LinkedIn: https://cutt.ly/IBhwv5o
-          </p>
+      <head>
+        <title>Thank You for Submitting Your Abstract</title>
+      </head>
+      <body>
+        <p>Dear $presenter,</p>
+
+        <p>Thank you for submitting your abstract to the 3rd ASFI Virtual Multidisciplinary Conference and Boot Camp.</p>
+
+        <p>This email is to confirm that we have received your abstract, and it is being given maximum attention by the conference abstract review committee.</p>
+
+        <p>As indicated in the call for abstract, all abstract authors will be informed about the decision on their abstract by 30th September 2025 (for regular submissions) and by 15th October 2025 (for late breaking submissions).</p>
+
+        <p>Meanwhile, registration for the conference is ongoing, with further information below, including the registration link:</p>
+        
+        <ul>
+          <li><strong>Early Bird (15th July – 30th September 2025)</strong>
+            <ul>
+              <li>ASFI Members: 10 USD (N10,000)</li>
+              <li>Non-ASFI Members: 30 USD (N30,000)</li>
+            </ul>
+          </li>
+          <li><strong>Late Registration (1st October – 24th November 2025)</strong>
+            <ul>
+              <li>ASFI Members: 20 USD (N20,000)</li>
+              <li>Non-ASFI Members: 50 USD (N50,000)</li>
+            </ul>
+          </li>
+          <li><strong>Registration link:</strong> <a href='https://africansciencefrontiers.com/event_registration.php?event=12'>https://africansciencefrontiers.com/event_registration.php?event=12</a></li>
+        </ul>
+
+        <p>Please feel free to circulate information about the conference to your colleagues and your networks.</p>
+
+        <p>Sincerely,<br />
+        ASFI Virtual Multidisciplinary Conference and Boot Camp Planning Committee<br />
+        African Science Frontiers Initiatives<br />
+        &quot;Raising the Next Generation of African Scientists&quot;<br />
+        🌐 Website: africansciencefrontiers.com<br />
+        📺 YouTube: ASFI Hub<br />
+        🐦 X: @AfricanScience2<br />
+        🔗 LinkedIn: ASFI LinkedIn
+        </p>
+      </body>
       </html>
       ";
       
+      $plain_text_message = "Dear $presenter,
+
+Thank you for submitting your abstract to the 3rd ASFI Virtual Multidisciplinary Conference and Boot Camp.
+
+This email is to confirm that we have received your abstract, and it is being given maximum attention by the conference abstract review committee.
+
+As indicated in the call for abstract, all abstract authors will be informed about the decision on their abstract by 30th September 2025 (for regular submissions) and by 15th October 2025 (for late breaking submissions).
+
+Meanwhile, registration for the conference is ongoing, with further information below, including the registration link:
+
+Early Bird (15th July – 30th September 2025)
+- ASFI Members: 10 USD (N10,000)
+- Non-ASFI Members: 30 USD (N30,000)
+
+Late Registration (1st October – 24th November 2025)
+- ASFI Members: 20 USD (N20,000)
+- Non-ASFI Members: 50 USD (N50,000)
+
+Registration link: https://africansciencefrontiers.com/event_registration.php?event=12
+
+Please feel free to circulate information about the conference to your colleagues and your networks.
+
+Sincerely,
+ASFI Virtual Multidisciplinary Conference and Boot Camp Planning Committee
+African Science Frontiers Initiatives
+\"Raising the Next Generation of African Scientists\"
+Website: africansciencefrontiers.com
+YouTube: ASFI Hub
+X: @AfricanScience2
+LinkedIn: ASFI LinkedIn";
       
       if(empty($author) || empty($abstract)){
-                  $_SESSION['alert'] = "Please Fill all Required Fields";
-                  $_SESSION['alert_code'] = "error";
-                  $_SESSION['alert_link'] = "virtual_conf_2024_abstract.php";
+          $_SESSION['alert'] = "Please Fill all Required Fields";
+          $_SESSION['alert_code'] = "error";
+          $_SESSION['alert_link'] = "virtual_conf_2024_abstract.php";
               
       }else{
           $query = $db->query("INSERT INTO `abstract` (`presenter`,`presenter_biography`, `presentation_type`, `State_of_study`, `theme`, `special_request`, `title`, `author`, `affliliation`, `abstract`, `date`, `author_email`, `gender`, `author_title`, `country_origin`, `country_residence`, `highest_degree`, `wphone_number`, `keywords`, `lateBreaker`)
           VALUES ('$presenter', '$presenter_biography', '$presentation_type', '$State_of_study', '$theme', '$special_request', '$title', '$author', '$affliliation', '$abstract', CURRENT_TIMESTAMP, '$author_email', '$gender', '$author_title', '$country_origin', '$country_residence', '$highest_degree', '$wphone_number','$keywords', '$lateBreaker')");
           
           if($query){
-    
-                 //Load Composer's autoloader
-                 require '../vendor/autoload.php';
-                 //Instantiation and passing `true` enables exceptions
-                 $mail = new PHPMailer(true);
-                 try {
-                     $mail->isSMTP();                                            //Send using SMTP
-                     $mail->Host       = 'africansciencefrontiers.com';                     //Set the SMTP server to send through
-                     $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
-                     $mail->Username   = 'mailme@africansciencefrontiers.com';                     //SMTP username
-                     $mail->Password   = 'mailme@ASFI';                               //SMTP password
-                     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;         //Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
-                     $mail->Port       = 587; 
-                     //Recipients
-                     
-                     $mail->setFrom('conference2023@africansciencefrontiers.com', 'African Science Frontiers Initiatives (ASFI)');
-                     $mail ->AddAddress($author_email);
-                     
-                     //Name is optional
-                     $mail->addReplyTo('conference2023@africansciencefrontiers.com', 'African Science Frontiers Initiatives (ASFI)');
-                 
-                 
-                     //Content
-                     $mail->isHTML(true);                                  //Set email format to HTML
-                     $mail->Subject = 'Abstract Submission Successful';
-                     $mail->Body    = $message;
-    
-                     $mail->send();
-                         $_SESSION['alert'] = "Hello $presenter, Your Abstract Submission was successful.";
-                         $_SESSION['alert_code'] = "success";
-                         $_SESSION['alert_link'] = 'https://africansciencefrontiers.com/virtual_conf_2025_';	
-                 } catch (Exception $e) {
-                         $_SESSION['alert'] = "Hello $presenter, Your Abstract Submission was successful.";
-                         $_SESSION['alert_code'] = "warning";
-                         $_SESSION['alert_link'] = 'https://africansciencefrontiers.com/virtual_conf_2025_';
-                 }
+              // Use Brevo API to send email
+                // Use Brevo API to send email - read from environment variable
+    $brevo_api_key = $_ENV['BREVO_API_KEY'] ?? getenv('BREVO_API_KEY');
+              // Prepare the email data for Brevo
+              $email_data = [
+                  'sender' => [
+                      'name' => 'African Science Frontiers Initiatives (ASFI)',
+                      'email' => 'conference2023@africansciencefrontiers.com'
+                  ],
+                  'to' => [
+                      [
+                          'email' => $author_email,
+                          'name' => $presenter
+                      ]
+                  ],
+                  'subject' => 'Thank You for Submitting Your Abstract to ASFI 3rd Annual Conference & Boot Camp',
+                  'htmlContent' => $message,
+                  'textContent' => $plain_text_message,
+                  'replyTo' => [
+                      'email' => 'conference2023@africansciencefrontiers.com',
+                      'name' => 'African Science Frontiers Initiatives (ASFI)'
+                  ]
+              ];
+              
+              // Send email using Brevo API
+              $ch = curl_init();
+              curl_setopt($ch, CURLOPT_URL, 'https://api.brevo.com/v3/smtp/email');
+              curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+              curl_setopt($ch, CURLOPT_POST, 1);
+              curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($email_data));
+              curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                  'accept: application/json',
+                  'api-key: ' . $brevo_api_key,
+                  'content-type: application/json'
+              ]);
+              
+              $result = curl_exec($ch);
+              $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+              curl_close($ch);
+              
+              if ($http_code >= 200 && $http_code < 300) {
+                  // Email sent successfully
+                  $_SESSION['alert'] = "Hello $presenter, Your Abstract Submission was successful. A confirmation email has been sent to $author_email.";
+                  $_SESSION['alert_code'] = "success";
+                  $_SESSION['alert_link'] = 'https://africansciencefrontiers.com/virtual_conf_2025_';	
+              } else {
+                  // Email sending failed but abstract was saved
+                  $_SESSION['alert'] = "Hello $presenter, Your Abstract Submission was successful but we couldn't send a confirmation email.";
+                  $_SESSION['alert_code'] = "warning";
+                  $_SESSION['alert_link'] = 'https://africansciencefrontiers.com/virtual_conf_2025_';
+              }
     
           }else{
               $_SESSION['alert'] = "Unsuccessful Try again";
@@ -902,7 +961,7 @@ if(isset($_POST['sub_email_submit'])){
                     <textarea required name="lateBreaker" placeholder="Explain how your research or project can be applied in practice or contribute to further research in the field" rows="4" title="Explain how your research or project can be applied in practice or contribute to further research in the field"></textarea>
                   </div> -->
                   <div class="mb-3">
-                    <div class="g-recaptcha" data-sitekey="6LeH3pIrAAAAAHJRkHJOuV--yt1Ig0C460mu6miE"></div>
+                    <div class="g-recaptcha" data-sitekey="6LcEcsUrAAAAACd3CAtZIO54BjvF7viwD__b0vTB"></div>
                   </div>
                    <button name="submit_course_reg" class="btn" type="submit">Submit<i class="fa fa-long-arrow-right ms-3"></i></button>
                 </form>

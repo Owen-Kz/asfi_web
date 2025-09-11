@@ -1,10 +1,13 @@
 <?php 
 include_once('header.php');
 
-// Add reCAPTCHA keys - REPLACE THESE WITH YOUR ACTUAL KEYS
-define('RECAPTCHA_SITE_KEY', '6LcEcsUrAAAAACd3CAtZIO54BjvF7viwD__b0vTB');
-define('RECAPTCHA_SECRET_KEY', '6LcEcsUrAAAAAP4RLg3FraLr0ZQU0WYmoBLg_g8D');
+include ('./includes/load_env.php');
+$siteKey = $_ENV['RECAPTCHA_SITE_KEY'] ?? getenv('RECAPTCHA_SITE_KEY');
+$captchaSecret = $_ENV['RECAPTCHA_SECRET_KEY'] ?? getenv('RECAPTCHA_SECRET_KEY');
 
+// Add reCAPTCHA keys - REPLACE THESE WITH YOUR ACTUAL KEYS
+define('RECAPTCHA_SITE_KEY', "$siteKey");
+define('RECAPTCHA_SECRET_KEY', "$captchaSecret");
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;

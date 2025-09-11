@@ -3,10 +3,13 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
+include ('./includes/load_env.php');
+$siteKey = $_ENV['RECAPTCHA_SITE_KEY'] ?? getenv('RECAPTCHA_SITE_KEY');
+$captchaSecret = $_ENV['RECAPTCHA_SECRET_KEY'] ?? getenv('RECAPTCHA_SECRET_KEY');
 
-// Define reCAPTCHA constants
-define('RECAPTCHA_SITE_KEY', '6LcEcsUrAAAAACd3CAtZIO54BjvF7viwD__b0vTB');
-define('RECAPTCHA_SECRET_KEY', '6LcEcsUrAAAAAP4RLg3FraLr0ZQU0WYmoBLg_g8D');
+// Add reCAPTCHA keys - REPLACE THESE WITH YOUR ACTUAL KEYS
+define('RECAPTCHA_SITE_KEY', "$siteKey");
+define('RECAPTCHA_SECRET_KEY', "$captchaSecret");
 
 // Regular pricing
 $non_members = '50';
