@@ -4,289 +4,355 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
+// Define reCAPTCHA constants
+define('RECAPTCHA_SITE_KEY', '6LcEcsUrAAAAACd3CAtZIO54BjvF7viwD__b0vTB');
+define('RECAPTCHA_SECRET_KEY', '6LcEcsUrAAAAAP4RLg3FraLr0ZQU0WYmoBLg_g8D');
+
+// Regular pricing
 $non_members = '50';
 $members = '20';
 $nigerian_non_member = '50000';
 $nigerian_members = '20000';
 $with_code = '0';
 
+// Early bird pricing
+$early_bird_non_members = '30';
+$early_bird_members = '10';
+$early_bird_nigerian_non_members = '30000';
+$early_bird_nigerian_members = '10000';
+
+// Check if current date is between July 15 and September 30, 2025
+$current_date = new DateTime();
+$early_bird_start = new DateTime('2025-07-15');
+$early_bird_end = new DateTime('2025-09-30');
+$is_early_bird = ($current_date >= $early_bird_start && $current_date <= $early_bird_end);
 
 if(isset($_GET['event'])){
 	$event_id = $_GET['event'];
 }
 
 if(isset($_POST['submit_course_reg'])){
-    $permittedChars ='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    $Submitcode = substr(str_shuffle($permittedChars), 0, 4);
-
-    $firstname = $_POST['firstname'];
-    $firstname = strip_tags($firstname);
-    $firstname = $db->real_escape_string($firstname);
-
-    $lastname = $_POST['lastname'];
-    $lastname = strip_tags($lastname);
-    $lastname = $db->real_escape_string($lastname);
-    
-    $email = $_POST['email'];
-    $email = strip_tags($email);
-    $email = $db->real_escape_string($email);
-    
-    $gender = $_POST['gender'];
-    $gender = strip_tags($gender);
-    $gender = $db->real_escape_string($gender);
-    
-    $age = $_POST['age'];
-    $age = strip_tags($age);
-    $age = $db->real_escape_string($age);
-
-    $country_origin = $_POST['country_origin'];
-    $country_origin = strip_tags($country_origin);
-    $country_origin = $db->real_escape_string($country_origin);
-
-    $country_residence = $_POST['country_residence'];
-    $country_residence = strip_tags($country_residence);
-    $country_residence = $db->real_escape_string($country_residence);
-
-    $highest_degree = $_POST['highest_degree'];
-    $highest_degree = strip_tags($highest_degree);
-    $highest_degree = $db->real_escape_string($highest_degree);
-
-    $title = $_POST['title'];
-    $title = strip_tags($title);
-    $title = $db->real_escape_string($title);
-
-    $wphone_number = $_POST['wphone_number'];
-    $wphone_number = strip_tags($wphone_number);
-    $wphone_number = $db->real_escape_string($wphone_number);
-
-    $affliliation = $_POST['affliliation'];
-    $affliliation = strip_tags($affliliation);
-    $affliliation = $db->real_escape_string($affliliation);
-
-    $membership = $_POST['membership'];
-    $membership = strip_tags($membership);
-    $membership = $db->real_escape_string($membership);
-
-    $member_Id = $_POST['member_Id'];
-    $member_Id = strip_tags($member_Id);
-    $member_Id = $db->real_escape_string($member_Id);
-
-
-    if($membership === 'YES' AND empty($member_Id)){
-        echo"<script>
-            alert('Please Enter Your Membership Number, If you are a member or select NO. Thank you');
-            window.location.href=''
-        </script> ";
-            exit();
-    }
-
-    if(!empty($member_Id)){
-        $queryCode = $db->query("SELECT * FROM membership_code WHERE member_code='$member_Id' ");
-        if($queryCode->num_rows === 1){
-            $member_Id = $member_Id;
-            $membership = 'YES';
-
-        }else{
-            echo"<script>
-            alert('You Entered A wrong Membership ID, please check and try again. Thank you');
-            window.location.href=''
-            </script>
-            ";
-            exit();
-        }
-
-    }
-
-
-    $discount_code = $_POST['discount_code'];
-
-    $Discount_avaliable = '';
-
-
-    if(!empty($discount_code)){
-       
-        if($discount_code === 'ASFI-2025-MVACBC'){
-
-               $Discount_avaliable = 'yes';
-            
-        }else{
-            echo"<script>
-                alert('Your Discount Code is wrong, please check and try again. Thank you');
-                window.location.href=''
-            </script>
-            ";
-            exit();
-        }
-    }
-    if(!empty($Discount_avaliable)){
-        $paymentContent = array(
-            'paymentPrice' => $with_code,
-            'Text' => 'Registration With Discount Code is FREE',
-        );
-        $text = "Registration With Discount Code is FREE";
-    }else{
-        if($country_origin === 'Nigeria'){
-            if($membership === 'YES'){
-                 $paymentContent = array(
-                    'paymentPrice' => $nigerian_members,
-                    'Text' => 'Nigerian ASFI Member to Pay ₦',
-                    'currency' => 'NGN',
-
-                );
-                $text = "Nigerian ASFI Member to Pay ₦".number_format($nigerian_members, 2);
-            }else{
-                    $paymentContent = array(
-                        'paymentPrice' => $nigerian_non_member,
-                        'Text' => 'Nigerian ASFI Non-Member to Pay ₦',
-                        'currency' => 'NGN',
-                    );
-                    $text = "Nigerian ASFI Non-Member to Pay ₦".number_format($nigerian_non_member, 2);
-                
-            }
-        }else{
-            if($membership === 'YES'){
-                $paymentContent = array(
-                    'paymentPrice' => $members,
-                    'Text' => 'ASFI Member to Pay $',
-                    'currency' => 'USD',
-                );
-                $text = "ASFI Member to Pay $".number_format($members, 2);
-
-            }else{
-                    $paymentContent = array(
-                        'paymentPrice' => $non_members,
-                        'Text' => 'ASFI Non-Member to Pay $',
-                        'currency' => 'USD',
-                    );
-                    $text = "ASFI Non-Member to Pay $".number_format($non_members, 2);
-            }
-        }
-    }
-    $paymentContent = json_encode($paymentContent,JSON_FORCE_OBJECT);
-
-
-
-    $message = "
-       <html>
-        <p>Dear $firstname</p>
-
-        <p>Thank you for registering to the 3rd ASFI Virtual Multidisciplinary Conference and Boot Camp. This email is to confirm your registration.  Please use the link below to pay your conference registration fee before the stipulated deadline. Please note that this link is unique to you and must not be shared to another person.</p>
-                
-        <p>Payment links:&nbsp;</p>
-        
-        <p>$text </p>
-        <p><a href='https://africansciencefrontiers.com/payment_page_event.php?SubmitCode=$Submitcode'>Click Here To Make Payment</a></p>
-                
-        <p>Best wishes,</p>
-        
-        <p>ASFI Courses Admin<br />
-        African Science Frontiers Initiatives<br />
-        &quot;Raising the next generation of African scientists...&quot;<br />
-        www.africansciencefrontiers.com<br />
-        Twitter: @AfricanScience2</p>
-    </html>
-    ";
-    
-    if(empty($firstname) || empty($highest_degree)){
-        $_SESSION['alert'] = "Fill all field and Please Try Again";
+    // reCAPTCHA verification
+    $recaptcha_response = isset($_POST['g-recaptcha-response']) ? $_POST['g-recaptcha-response'] : '';
+    if(empty($recaptcha_response)) {
+        $_SESSION['alert'] = "Please complete the reCAPTCHA verification";
         $_SESSION['alert_code'] = "error";
         $_SESSION['alert_link'] = "";
-    }else{
-        $query = $db->query("INSERT INTO `events_registration` (`event_id`, `firstname`, `lastname`, `email`, `title`, `gender`, `age`, `highest_degree`, `country_origin`, `country_residence`, `wphone_number`, `affliliation`, `membership`, `member_Id`, `paymentContent`, `submitCode`, `payment_status`, `reg_date`)
-        VALUES ('$event_id', '$firstname', '$lastname', '$email', '$title', '$gender', '$age', '$highest_degree', '$country_origin', '$country_residence', '$wphone_number', '$affliliation', '$membership', '$member_Id', '$paymentContent', '$Submitcode', '', CURRENT_TIMESTAMP)");
-
-
-        // move image
-        if($query){
-
-            //Load Composer's autoloader
-            require 'vendor/autoload.php';
-            //Instantiation and passing `true` enables exceptions
-            $mail = new PHPMailer(true);
-            try {
-                $mail->isSMTP();                                            //Send using SMTP
-                $mail->Host       = 'africansciencefrontiers.com';                     //Set the SMTP server to send through
-                $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
-                $mail->Username   = 'mailme@africansciencefrontiers.com';                     //SMTP username
-                $mail->Password   = 'mailme@ASFI';                               //SMTP password
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;         //Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
-                $mail->Port       = 587; 
-                //Recipients
-                
-                $mail->setFrom('conference2023@africansciencefrontiers.com', 'African Science Frontiers Initiatives (ASFI)');
-                $mail ->AddAddress($email);
-                
-                //Name is optional
-                $mail->addReplyTo('conference2023@africansciencefrontiers.com', 'African Science Frontiers Initiatives (ASFI)');
-            
-            
-                //Content
-                $mail->isHTML(true);                                  //Set email format to HTML
-                $mail->Subject = 'Event Registration Successful';
-                $mail->Body    = $message;
-
-                $mail->send();
-                    $_SESSION['alert'] = "Hello $firstname, Your Event Registration was successful.  $text . Please Click Ok to continue to the payment Link.";
-                    $_SESSION['alert_code'] = "success";
-                    $_SESSION['alert_link'] = 'payment_page_event.php?SubmitCode='.$Submitcode;	
-            } catch (Exception $e) {
-                    $_SESSION['alert'] = "Hello $firstname, Your Event Registration was successful. $text . Please Click Ok to continue to the payment Link.";
-                    $_SESSION['alert_code'] = "warning";
-                    $_SESSION['alert_link'] = 'payment_page_event.php?SubmitCode='.$Submitcode;
-            }
-
-           
-        }else{
-            $_SESSION['alert'] = "Event Registration Not successfully. Please Try Again";
+    } else {
+        // Verify reCAPTCHA
+        $recaptcha_verify = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=".RECAPTCHA_SECRET_KEY."&response={$recaptcha_response}");
+        $recaptcha_data = json_decode($recaptcha_verify);
+        
+        if (!$recaptcha_data->success) {
+            // reCAPTCHA verification failed
+            $_SESSION['alert'] = "reCAPTCHA verification failed. Please try again.";
             $_SESSION['alert_code'] = "error";
             $_SESSION['alert_link'] = "";
+        } else {
+            // reCAPTCHA verification successful, process the form
+            $permittedChars ='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            $Submitcode = substr(str_shuffle($permittedChars), 0, 4);
+
+            $firstname = $_POST['firstname'];
+            $firstname = strip_tags($firstname);
+            $firstname = $db->real_escape_string($firstname);
+
+            $lastname = $_POST['lastname'];
+            $lastname = strip_tags($lastname);
+            $lastname = $db->real_escape_string($lastname);
+            
+            $email = $_POST['email'];
+            $email = strip_tags($email);
+            $email = $db->real_escape_string($email);
+            
+            $gender = $_POST['gender'];
+            $gender = strip_tags($gender);
+            $gender = $db->real_escape_string($gender);
+            
+            $age = $_POST['age'];
+            $age = strip_tags($age);
+            $age = $db->real_escape_string($age);
+
+            $country_origin = $_POST['country_origin'];
+            $country_origin = strip_tags($country_origin);
+            $country_origin = $db->real_escape_string($country_origin);
+
+            $country_residence = $_POST['country_residence'];
+            $country_residence = strip_tags($country_residence);
+            $country_residence = $db->real_escape_string($country_residence);
+
+            $highest_degree = $_POST['highest_degree'];
+            $highest_degree = strip_tags($highest_degree);
+            $highest_degree = $db->real_escape_string($highest_degree);
+
+            $title = $_POST['title'];
+            $title = strip_tags($title);
+            $title = $db->real_escape_string($title);
+
+            $wphone_number = $_POST['wphone_number'];
+            $wphone_number = strip_tags($wphone_number);
+            $wphone_number = $db->real_escape_string($wphone_number);
+
+            $affliliation = $_POST['affliliation'];
+            $affliliation = strip_tags($affliliation);
+            $affliliation = $db->real_escape_string($affliliation);
+
+            $membership = $_POST['membership'];
+            $membership = strip_tags($membership);
+            $membership = $db->real_escape_string($membership);
+
+            $member_Id = $_POST['member_Id'];
+            $member_Id = strip_tags($member_Id);
+            $member_Id = $db->real_escape_string($member_Id);
+
+            if($membership === 'YES' AND empty($member_Id)){
+                echo"<script>
+                    alert('Please Enter Your Membership Number, If you are a member or select NO. Thank you');
+                    window.location.href=''
+                </script> ";
+                    exit();
+            }
+
+            if(!empty($member_Id)){
+                $queryCode = $db->query("SELECT * FROM membership_code WHERE member_code='$member_Id' ");
+                if($queryCode->num_rows === 1){
+                    $member_Id = $member_Id;
+                    $membership = 'YES';
+
+                }else{
+                    echo"<script>
+                    alert('You Entered A wrong Membership ID, please check and try again. Thank you');
+                    window.location.href=''
+                    </script>
+                    ";
+                    exit();
+                }
+            }
+
+            $discount_code = $_POST['discount_code'];
+            $Discount_avaliable = '';
+
+            if(!empty($discount_code)){
+                if($discount_code === 'ASFI-2025-MVACBC'){
+                    $Discount_avaliable = 'yes';
+                }else{
+                    echo"<script>
+                        alert('Your Discount Code is wrong, please check and try again. Thank you');
+                        window.location.href=''
+                    </script>
+                    ";
+                    exit();
+                }
+            }
+            
+            if(!empty($Discount_avaliable)){
+                $paymentContent = array(
+                    'paymentPrice' => $with_code,
+                    'Text' => 'Registration With Discount Code is FREE',
+                );
+                $text = "Registration With Discount Code is FREE";
+            }else{
+                // Apply early bird pricing if within the date range
+                if($is_early_bird) {
+                    if($country_origin === 'Nigeria'){
+                        if($membership === 'YES'){
+                            $paymentContent = array(
+                                'paymentPrice' => $early_bird_nigerian_members,
+                                'Text' => 'Nigerian ASFI Member to Pay ₦ (Early Bird)',
+                                'currency' => 'NGN',
+                            );
+                            $text = "Nigerian ASFI Member to Pay ₦".number_format($early_bird_nigerian_members, 2) . " (Early Bird)";
+                        }else{
+                            $paymentContent = array(
+                                'paymentPrice' => $early_bird_nigerian_non_members,
+                                'Text' => 'Nigerian ASFI Non-Member to Pay ₦ (Early Bird)',
+                                'currency' => 'NGN',
+                            );
+                            $text = "Nigerian ASFI Non-Member to Pay ₦".number_format($early_bird_nigerian_non_members, 2) . " (Early Bird)";
+                        }
+                    }else{
+                        if($membership === 'YES'){
+                            $paymentContent = array(
+                                'paymentPrice' => $early_bird_members,
+                                'Text' => 'ASFI Member to Pay $ (Early Bird)',
+                                'currency' => 'USD',
+                            );
+                            $text = "ASFI Member to Pay $".number_format($early_bird_members, 2) . " (Early Bird)";
+                        }else{
+                            $paymentContent = array(
+                                'paymentPrice' => $early_bird_non_members,
+                                'Text' => 'ASFI Non-Member to Pay $ (Early Bird)',
+                                'currency' => 'USD',
+                            );
+                            $text = "ASFI Non-Member to Pay $".number_format($early_bird_non_members, 2) . " (Early Bird)";
+                        }
+                    }
+                } else {
+                    // Regular pricing
+                    if($country_origin === 'Nigeria'){
+                        if($membership === 'YES'){
+                            $paymentContent = array(
+                                'paymentPrice' => $nigerian_members,
+                                'Text' => 'Nigerian ASFI Member to Pay ₦',
+                                'currency' => 'NGN',
+                            );
+                            $text = "Nigerian ASFI Member to Pay ₦".number_format($nigerian_members, 2);
+                        }else{
+                            $paymentContent = array(
+                                'paymentPrice' => $nigerian_non_member,
+                                'Text' => 'Nigerian ASFI Non-Member to Pay ₦',
+                                'currency' => 'NGN',
+                            );
+                            $text = "Nigerian ASFI Non-Member to Pay ₦".number_format($nigerian_non_member, 2);
+                        }
+                    }else{
+                        if($membership === 'YES'){
+                            $paymentContent = array(
+                                'paymentPrice' => $members,
+                                'Text' => 'ASFI Member to Pay $',
+                                'currency' => 'USD',
+                            );
+                            $text = "ASFI Member to Pay $".number_format($members, 2);
+                        }else{
+                            $paymentContent = array(
+                                'paymentPrice' => $non_members,
+                                'Text' => 'ASFI Non-Member to Pay $',
+                                'currency' => 'USD',
+                            );
+                            $text = "ASFI Non-Member to Pay $".number_format($non_members, 2);
+                        }
+                    }
+                }
+            }
+            $paymentContent = json_encode($paymentContent,JSON_FORCE_OBJECT);
+
+            $message = "
+               <html>
+                <p>Dear $firstname</p>
+
+                <p>Thank you for registering to the 3rd ASFI Virtual Multidisciplinary Conference and Boot Camp. This email is to confirm your registration.  Please use the link below to pay your conference registration fee before the stipulated deadline. Please note that this link is unique to you and must not be shared to another person.</p>
+                        
+                <p>Payment links:&nbsp;</p>
+                
+                <p>$text </p>
+                <p><a href='https://africansciencefrontiers.com/payment_page_event.php?SubmitCode=$Submitcode'>Click Here To Make Payment</a></p>
+                        
+                <p>Best wishes,</p>
+                
+                <p>ASFI Courses Admin<br />
+                African Science Frontiers Initiatives<br />
+                &quot;Raising the next generation of African scientists...&quot;<br />
+                www.africansciencefrontiers.com<br />
+                Twitter: @AfricanScience2</p>
+            </html>
+            ";
+            
+            if(empty($firstname) || empty($highest_degree)){
+                $_SESSION['alert'] = "Fill all field and Please Try Again";
+                $_SESSION['alert_code'] = "error";
+                $_SESSION['alert_link'] = "";
+            }else{
+                $query = $db->query("INSERT INTO `events_registration` (`event_id`, `firstname`, `lastname`, `email`, `title`, `gender`, `age`, `highest_degree`, `country_origin`, `country_residence`, `wphone_number`, `affliliation`, `membership`, `member_Id`, `paymentContent`, `submitCode`, `payment_status`, `reg_date`)
+                VALUES ('$event_id', '$firstname', '$lastname', '$email', '$title', '$gender', '$age', '$highest_degree', '$country_origin', '$country_residence', '$wphone_number', '$affliliation', '$membership', '$member_Id', '$paymentContent', '$Submitcode', '', CURRENT_TIMESTAMP)");
+
+                if($query){
+                    //Load Composer's autoloader
+                    require 'vendor/autoload.php';
+                    //Instantiation and passing `true` enables exceptions
+                    $mail = new PHPMailer(true);
+                    try {
+                        $mail->isSMTP();                                            //Send using SMTP
+                        $mail->Host       = 'africansciencefrontiers.com';                     //Set the SMTP server to send through
+                        $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
+                        $mail->Username   = 'mailme@africansciencefrontiers.com';                     //SMTP username
+                        $mail->Password   = 'mailme@ASFI';                               //SMTP password
+                        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;         //Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
+                        $mail->Port       = 587; 
+                        //Recipients
+                        
+                        $mail->setFrom('conference2023@africansciencefrontiers.com', 'African Science Frontiers Initiatives (ASFI)');
+                        $mail ->AddAddress($email);
+                        
+                        //Name is optional
+                        $mail->addReplyTo('conference2023@africansciencefrontiers.com', 'African Science Frontiers Initiatives (ASFI)');
+                    
+                    
+                        //Content
+                        $mail->isHTML(true);                                  //Set email format to HTML
+                        $mail->Subject = 'Event Registration Successful';
+                        $mail->Body    = $message;
+
+                        $mail->send();
+                            $_SESSION['alert'] = "Hello $firstname, Your Event Registration was successful.  $text . Please Click Ok to continue to the payment Link.";
+                            $_SESSION['alert_code'] = "success";
+                            $_SESSION['alert_link'] = 'payment_page_event.php?SubmitCode='.$Submitcode;	
+                    } catch (Exception $e) {
+                            $_SESSION['alert'] = "Hello $firstname, Your Event Registration was successful. $text . Please Click Ok to continue to the payment Link.";
+                            $_SESSION['alert_code'] = "warning";
+                            $_SESSION['alert_link'] = 'payment_page_event.php?SubmitCode='.$Submitcode;
+                    }
+                }else{
+                    $_SESSION['alert'] = "Event Registration Not successfully. Please Try Again";
+                    $_SESSION['alert_code'] = "error";
+                    $_SESSION['alert_link'] = "";
+                }
+            }
         }
     }   
-    
 }
-
-
 ?>
-<title>3rd Annual ASFI Virtual Multidisciplinary Conference & Boot Camp  || African Science Frontiers Initiatives (ASFI)</title>
-    <!-- Page Title -->
-    <section class="page-title" style="background-image:url(images/image6.jpg)">
-        <div class="auto-container">
-            <div class="content-box">
-                <h1>3rd Annual ASFI Virtual Multidisciplinary Conference & Boot Camp 2025</h1>
-                <ul class="bread-crumb">
-                    <li><a class="home" href="index.php"><span class="fa fa-home"></span></a></li>
-                    <li>3rd Annual ASFI Virtual Multidisciplinary Conference & Boot Camp  </li>
-                </ul>
-            </div>
-        </div>
-    </section>
-    <style>
-        label.error{
-            color:red;
-            display: block;
-            font-size: 12px;
-        }
-    </style>
 
-     <!-- Causes Details -->
-     <div class="sidebar-page-container cause-details">
-        <div class="auto-container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="donate-form-area" id="form">
-                        <div class="donate-form-wrapper">
-                            <div class="sec-title">
-                                <div class="text-center">
-                                  <!--  <img src="images/virtual-images/conf_reg.jpg" alt="" width="400px" title=""><br><br> -->
-                                    <p>THEME</p>
-                                    <h1>Beyond Boundaries: Breaking Collaborative Frontiers for Impactful Research and Career</h1>
-                                </div>
-                               
+<title>3rd Annual ASFI Virtual Multidisciplinary Conference & Boot Camp  || African Science Frontiers Initiatives (ASFI)</title>
+<!-- Page Title -->
+<section class="page-title" style="background-image:url(images/image6.jpg)">
+    <div class="auto-container">
+        <div class="content-box">
+            <h1>3rd Annual ASFI Virtual Multidisciplinary Conference & Boot Camp 2025</h1>
+            <ul class="bread-crumb">
+                <li><a class="home" href="index.php"><span class="fa fa-home"></span></a></li>
+                <li>3rd Annual ASFI Virtual Multidisciplinary Conference & Boot Camp  </li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<style>
+    label.error{
+        color:red;
+        display: block;
+        font-size: 12px;
+    }
+    .recaptcha-error {
+        color: red;
+        font-size: 12px;
+        margin-top: 5px;
+        display: none;
+    }
+</style>
+
+<!-- Causes Details -->
+<div class="sidebar-page-container cause-details">
+    <div class="auto-container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="donate-form-area" id="form">
+                    <div class="donate-form-wrapper">
+                        <div class="sec-title">
+                            <div class="text-center">
+                                <p>THEME</p>
+                                <h1>Beyond Boundaries: Breaking Collaborative Frontiers for Impactful Research and Career</h1>
+                                <?php if($is_early_bird): ?>
+                                    <div class="alert alert-info">
+                                        <strong>Early Bird Registration!</strong> Special pricing available until September 30, 2025.
+                                    </div>
+                                <?php endif; ?>
                             </div>
-                            <hr>
-                            <form  action="" method="post" name="formValidate" id="formValidate" class="donate-form default-form">
-                                <div class="contact-form">
-                                    <div class="row clearfix">
+                        </div>
+                        <hr>
+                        <form action="" method="post" name="formValidate" id="formValidate" class="donate-form default-form">
+                            <div class="contact-form">
+                                <div class="row clearfix">
+                                    <!-- Form fields remain the same as your original code -->
                                         <div class="col-lg-6 col-md-6 column">
                                             <div class="form-group">
                                                 <label for="firstname"><b>FIRST NAME</b></label>
@@ -908,31 +974,35 @@ if(isset($_POST['submit_course_reg'])){
                                             </div>
                                         </div>
 
-
-                                        
                                     
-                                      
-                                        <div class="col-md-12 col-sm-12 col-xs-12">
-                                            <div class="form-group d-flex align-items-center justify-content-between">
-                                                <button class="theme-btn btn-style-one" name="submit_course_reg" type="submit"><span>Submit</span></button>
-                                            </div>
-                                        </div>  
+                                    <!-- Add reCAPTCHA widget -->
+                                    <div class="col-lg-12 col-md-12 column">
+                                        <div class="form-group">
+                                            <div class="g-recaptcha" data-sitekey="<?php echo RECAPTCHA_SITE_KEY; ?>"></div>
+                                            <div id="recaptcha-error" class="recaptcha-error">Please complete the reCAPTCHA verification</div>
+                                        </div>
                                     </div>
+                                    
+                                    <div class="col-md-12 col-sm-12 col-xs-12">
+                                        <div class="form-group d-flex align-items-center justify-content-between">
+                                            <button class="theme-btn btn-style-one" name="submit_course_reg" type="submit"><span>Submit</span></button>
+                                        </div>
+                                    </div>  
                                 </div>
-                            </form>
-                        </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-
-
+</div>
 
 <?php include_once('footer.php');?>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
 <script>
 
     $("#formValidate").validate({
