@@ -42,7 +42,7 @@ $recaptcha_secret_key = $captchaSecret;
                     <form action="" method="post">
                         <input type="email" name="sub_email" placeholder="Your Email Address...">
                         <!-- Add reCAPTCHA widget -->
-                        <div class="g-recaptcha" data-sitekey="<?php echo $recaptcha_site_key; ?>"></div>
+                        <!-- <div class="g-recaptcha" data-sitekey="<?php echo $recaptcha_site_key; ?>"></div> -->
                         <button type="submit" name="sub_email_submit" class="theme-btn btn-style-fourteen"><span>Subscribe Us</span></button>                        
                     </form>
                 </div>
