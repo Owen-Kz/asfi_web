@@ -68,6 +68,24 @@
                             </ul>
                         </div>
                     </div>
+                    <div class="sec-title mb-40">
+            <h2>Program Trailer</h2>
+            <div class="video-container">
+                <div class="youtube-video-wrapper">
+                    <iframe 
+                        src="https://www.youtube.com/embed/tHl5-S3BROg" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                <div class="video-caption text-center mt-3">
+                    <a href="https://www.youtube.com/watch?v=tHl5-S3BROg" target="_blank" class="video-link">
+                        Watch on YouTube
+                    </a>
+                </div>
+            </div>
+        </div>
                 </div>
                 <div class="col-lg-4">
                     <div class="sec-title mb-40">
@@ -163,5 +181,52 @@
             </div>
         </div>
     </section>  
+
+    <style>
+        .youtube-video-wrapper {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+    height: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.youtube-video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.video-link {
+    display: inline-block;
+    color: #e5a130;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    padding: 8px 16px;
+    border: 2px solid #e5a130;
+    border-radius: 4px;
+}
+
+.video-link:hover {
+    background-color: #e5a130;
+    color: white;
+    text-decoration: none;
+}
+
+.video-container {
+    margin-top: 20px;
+}
+
+@media (max-width: 991px) {
+    .video-container {
+        margin-top: 30px;
+    }
+}
+    </style>
 
 <?php include_once('footer.php'); ?>
