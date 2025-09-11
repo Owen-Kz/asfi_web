@@ -318,7 +318,9 @@ if(isset($_POST['sub_email_submit'])){
           <div class="row">
             <div class="col-lg-2 col-md-6">
               <div class="navbar-brand m-0">
+                 <a href="https://africansciencefrontiers.com/">
                 <img src="images/logo/1.png" alt="Logo" class="w-100">
+              </a>
               </div>
             </div>
             <div class="col-lg-7 col-md-6 ">
