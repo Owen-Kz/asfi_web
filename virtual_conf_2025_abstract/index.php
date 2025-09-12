@@ -7,6 +7,7 @@ include '../includes/load_env.php';
 
   // Verify reCAPTCHA
   $secret = $_ENV['RECAPTCHA_SECRET_KEY'] ?? getenv('RECAPTCHA_SECRET_KEY');
+              $brevo_api_key = $_ENV['BREVO_API_KEY'] ?? getenv('BREVO_API_KEY');
  
   $response = $_POST['g-recaptcha-response'];
   $remoteip = $_SERVER['REMOTE_ADDR'];
@@ -182,7 +183,6 @@ LinkedIn: ASFI LinkedIn";
           
           if($query){
               // Use Brevo API to send email - read from environment variable
-              $brevo_api_key = $_ENV['BREVO_API_KEY'] ?? getenv('BREVO_API_KEY');
               
               // Prepare the email data for Brevo
               $email_data = [
