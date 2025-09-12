@@ -125,7 +125,7 @@ include ('includes/db_connect.php');
                                                     <li><a href="courses.php">Courses & Workshops</a></li>
                                                     <li class="dropdown"><a href="">Virtual Conferences</a>
                                                     <ul>
-<li><a href="https://africansciencefrontiers.com/virtual_conf_2025_?event_id=12">2025 Virtual Conference</a></li>
+<li><a href="https://africansciencefrontiers.com/virtual_conf_2025_abstract?event_id=12">2025 Virtual Conference</a></li>
 <li><a href="https://africansciencefrontiers.com/events-details.php?event_id=10">2024 Virtual Conference</a></li>
  <li><a href="2023_virtual_conf_event_highlight.php">2023 Virtual Conference</a></li>
                                                     </ul>
