@@ -6,7 +6,6 @@ include ('../includes/db_connect.php');
 include '../includes/load_env.php';
 include '../includes/brevo.php';
 
-echo $brevo_api_key;
 
   // Verify reCAPTCHA
   $secret = $_ENV['RECAPTCHA_SECRET_KEY'] ?? getenv('RECAPTCHA_SECRET_KEY');
