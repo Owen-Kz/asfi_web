@@ -148,7 +148,7 @@ if(isset($_GET['event_id'])){
                     <?php if(!empty($event_link)){?>
                          <?php if($event_id == 12){?>
                             
-                            <div class="link-btn text-center"><a href="virtual_conf_2025_?event=12" class="theme-btn btn-style-one"><span>Submit Your Abstract</span></a>  <a href="event_registration.php?event=<?=$event_id?>" class="theme-btn btn-style-one"><span>Event Registration</span></a>  </div>
+                            <div class="link-btn text-center"><a href="virtual_conf_2025_abstract?event=12" class="theme-btn btn-style-one"><span>Submit Your Abstract</span></a>  <a href="event_registration.php?event=<?=$event_id?>" class="theme-btn btn-style-one"><span>Event Registration</span></a>  </div>
                          <?php }else{ ?>
                             <div class="link-btn text-center"><a href="<?=$event_link?>" class="theme-btn btn-style-one"><span>Event Registration Link</span></a></div>
                          <?php } ?>
