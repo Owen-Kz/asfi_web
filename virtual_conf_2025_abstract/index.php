@@ -6,6 +6,7 @@ include ('../includes/db_connect.php');
 include '../includes/load_env.php';
 include '../includes/brevo.php';
 
+echo $brevo_api_key;
 
   // Verify reCAPTCHA
   $secret = $_ENV['RECAPTCHA_SECRET_KEY'] ?? getenv('RECAPTCHA_SECRET_KEY');
@@ -222,7 +223,7 @@ LinkedIn: ASFI LinkedIn";
               $result = curl_exec($ch);
               $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
               curl_close($ch);
-              
+              print_r($result);
               if ($http_code >= 200 && $http_code < 300) {
                   // Email sent successfully
                   $_SESSION['alert'] = "Hello $presenter, Your Abstract Submission was successful. A confirmation email has been sent to $author_email.";
