@@ -6,7 +6,7 @@ include ('../includes/db_connect.php');
 include '../includes/load_env.php';
 
   // Verify reCAPTCHA
-  $secret = $_ENV['RECAPTCHA_SECRET'] ?? getenv('RECAPTCHA_SECRET');
+  $secret = $_ENV['RECAPTCHA_SECRET_KEY'] ?? getenv('RECAPTCHA_SECRET_KEY');
  
   $response = $_POST['g-recaptcha-response'];
   $remoteip = $_SERVER['REMOTE_ADDR'];
