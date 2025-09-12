@@ -35,4 +35,3 @@ $rootPath = realpath(__DIR__ . '/../');
 loadEnv($rootPath . '/.env');
 
 // // Then use as before:
-// $brevo_api_key = $_ENV['BREVO_API_KEY'] ?? getenv('BREVO_API_KEY');
